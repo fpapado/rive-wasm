@@ -42,7 +42,10 @@ const offscreenWebGL = new (function () {
 
   const initGL = function () {
     if (!_gl) {
-      const canvas = document.createElement("canvas");
+      // perform feature-detection with whichever canvas is available (DOM or Offscreen)
+      const canvas =
+        globalThis.document?.createElement("canvas") ??
+        new OffscreenCanvas(1, 1);
       const contextAttribs = {
         "alpha": 1,
         "depth": 0,

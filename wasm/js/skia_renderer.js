@@ -94,7 +94,10 @@ Module["onRuntimeInitialized"] = function () {
   Module.makeRenderer = function (canvas, useOffScreenRenderer) {
     if (useOffScreenRenderer) {
       if (!_offscreenGL) {
-        _offscreenGL = makeGLRenderer(document.createElement("canvas"));
+        _offscreenGL = makeGLRenderer(
+          globalThis.document?.createElement("canvas") ??
+            new OffscreenCanvas(1, 1)
+        );
         const gl = _offscreenGL._gl;
         _offscreenGL._maxRTSize = Math.min(
           gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
