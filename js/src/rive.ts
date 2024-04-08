@@ -1,12 +1,12 @@
-import * as rc from "./rive_advanced.mjs";
 import * as packageData from "package.json";
-import { registerTouchInteractions, sanitizeUrl, BLANK_URL } from "./utils";
+import * as rc from "./rive_advanced.mjs";
+import { BLANK_URL, registerTouchInteractions, sanitizeUrl } from "./utils";
 
 // Note: Re-exporting a few types from rive_advanced.mjs to expose for high-level
 // API usage without re-defining their type definition here. May want to revisit
 // and see if we want to expose both types from rive.ts and rive_advanced.mjs in
 // the future
-export type { FileAsset, FontAsset, ImageAsset } from './rive_advanced.mjs';
+export type { FileAsset, FontAsset, ImageAsset } from "./rive_advanced.mjs";
 
 /**
  * Generic type for a parameterless void callback
@@ -610,12 +610,9 @@ class Animator {
   /**
    * Adds linear animations by their names.
    * @param animatables the name(s) of animations to add
-   * @param playing whether animations should play on instantiation 
+   * @param playing whether animations should play on instantiation
    */
-  public initLinearAnimations(
-    animatables: string[],
-    playing: boolean,
-  ) {
+  public initLinearAnimations(animatables: string[], playing: boolean) {
     // Play/pause already instanced items, or create new instances
     // This validation is kept to maintain compatibility with current behavior.
     // But given that it this is called during artboard initialization
@@ -633,7 +630,7 @@ class Animator {
             anim,
             this.artboard,
             this.runtime,
-            playing
+            playing,
           );
           // Display the first frame of the specified animation
           newAnimation.advance(0);
@@ -647,12 +644,9 @@ class Animator {
   /**
    * Adds state machines by their names.
    * @param animatables the name(s) of state machines to add
-   * @param playing whether state machines should play on instantiation 
+   * @param playing whether state machines should play on instantiation
    */
-  public initStateMachines(
-    animatables: string[],
-    playing: boolean,
-  ) {
+  public initStateMachines(animatables: string[], playing: boolean) {
     // Play/pause already instanced items, or create new instances
     // This validation is kept to maintain compatibility with current behavior.
     // But given that it this is called during artboard initialization
@@ -670,7 +664,7 @@ class Animator {
             sm,
             this.runtime,
             playing,
-            this.artboard
+            this.artboard,
           );
           this.stateMachines.push(newStateMachine);
         } else {
@@ -1917,6 +1911,27 @@ export class Rive {
     }
   }
 
+  /**
+   * Resize the canvas drawing surface to custom dimensions. These should match
+   * the size of the backing canvas, accounting for the devicePixelRatio. This
+   * is useful for resizing the canvas when Rive itself does not have access to
+   * the DOM, e.g. when rendering to an OffscreenCanvas in a web Worker.
+   *
+   * Need to re-render and resize the layout to match the new drawing surface
+   * afterwards.
+   */
+  public resizeDrawingSurfaceAdvanced(
+    width: number,
+    height: number,
+    devicePixelRatio?: number, // left as a reminder/convenience for the caller
+  ) {
+    const dpr = devicePixelRatio ?? 1;
+    this.canvas.width = dpr * width;
+    this.canvas.height = dpr * height;
+    this.startRendering();
+    this.resizeToCanvas();
+  }
+
   // Returns the animation source, which may be undefined
   public get source(): string {
     return this.src;
@@ -2277,8 +2292,8 @@ export const Testing = {
 
 /**
  * Decodes bytes into an image.
- * 
- * Be sure to call `.dispose()` on the image once it is no longer needed. This 
+ *
+ * Be sure to call `.dispose()` on the image once it is no longer needed. This
  * allows the engine to clean it up when it is not used by any more animations.
  */
 export const decodeImage = (bytes: Uint8Array): Promise<rc.Image> => {
@@ -2291,8 +2306,8 @@ export const decodeImage = (bytes: Uint8Array): Promise<rc.Image> => {
 
 /**
  * Decodes bytes into a font.
- * 
- * Be sure to call `.dispose()` on the font once it is no longer needed. This 
+ *
+ * Be sure to call `.dispose()` on the font once it is no longer needed. This
  * allows the engine to clean it up when it is not used by any more animations.
  */
 export const decodeFont = (bytes: Uint8Array): Promise<rc.Font> => {
